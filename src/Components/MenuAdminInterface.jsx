@@ -9,12 +9,16 @@ import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 
+axios.defaults.baseURL = 'https://wildcatsexpressbackend.onrender.com';
+axios.defaults.withCredentials = true;
+
 const MainAdminInterface = () => {
   const [socket, setSocket] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [notificationPermission, setNotificationPermission] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [apiError, setApiError] = useState(null);
   const [currentItem, setCurrentItem] = useState({
     _id: null,
     name: "",
@@ -76,6 +80,35 @@ const MainAdminInterface = () => {
   }, []);
 
   useEffect(() => {
+    const setupAPIErrorHandler = () => {
+      axios.interceptors.response.use(
+        response => response,
+        error => {
+          if (error.response) {
+            // Handle specific error codes
+            switch (error.response.status) {
+              case 404:
+                setApiError('Resource not found');
+                break;
+              case 401:
+                navigate('/login');
+                break;
+              case 500:
+                setApiError('Server error');
+                break;
+              default:
+                setApiError('An error occurred');
+            }
+          }
+          return Promise.reject(error);
+        }
+      );
+    };
+  
+    setupAPIErrorHandler();
+  }, []);
+
+  useEffect(() => {
     fetchMenuItems();
     fetchOrders();
     fetchQRCode();
@@ -127,6 +160,44 @@ const MainAdminInterface = () => {
       };
     }
   }, [socket]);
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      try {
+        const response = await axios.get("https://wildcatsexpressbackend.onrender.com/api/check-admin", {
+          withCredentials: true
+        });
+        
+        if (response.data.valid) {
+          setMessage(response.data.message);
+        } else {
+          navigate("/login");
+        }
+      } catch (error) {
+        if (error.response && error.response.status === 404) {
+          // If endpoint doesn't exist, you might want to check an alternative endpoint
+          try {
+            const altResponse = await axios.get("https://wildcatsexpressbackend.onrender.com/api/auth/check", {
+              withCredentials: true
+            });
+            if (altResponse.data.valid) {
+              setMessage(altResponse.data.message);
+            } else {
+              navigate("/login");
+            }
+          } catch (altError) {
+            console.error("Authentication failed:", altError);
+            navigate("/login");
+          }
+        } else {
+          console.error("Error checking admin status:", error);
+          navigate("/login");
+        }
+      }
+    };
+  
+    checkAdmin();
+  }, []);
 
   const addNotification = (message, orderId) => {
     if (!message) {
@@ -629,14 +700,17 @@ const MainAdminInterface = () => {
 
   const fetchQRCode = async () => {
     try {
-      const response = await axios.get("https://wildcatsexpressbackend.onrender.com/api/get-qr-code");
-      if (response.data.qrCodeUrl) {
+      const response = await axios.get("https://wildcatsexpressbackend.onrender.com/api/qr-code"); // Changed endpoint
+      if (response.data && response.data.qrCodeUrl) {
         setQrCodeImage(`https://wildcatsexpressbackend.onrender.com/api${response.data.qrCodeUrl}`);
       } else {
         setQrCodeImage(null);
       }
     } catch (error) {
-      if (error.response && error.response.status !== 404) {
+      // Don't log 404s as they're expected when no QR code exists
+      if (error.response && error.response.status === 404) {
+        setQrCodeImage(null);
+      } else {
         console.error("Error fetching QR code:", error);
       }
       setQrCodeImage(null);
