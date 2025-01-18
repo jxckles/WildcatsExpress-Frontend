@@ -25,7 +25,7 @@ const ResetPassword = () => {
 
     try {
       const response = await axios.post(
-        `https://wildcatsexpressbackend.onrender.com/reset-password/${token}`,
+        `https://wildcatsexpressbackend.onrender.com/api/reset-password/${token}`,
         { password: newPassword } // Ensure correct field name and value
       );
 

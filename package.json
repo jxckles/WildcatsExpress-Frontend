@@ -2,7 +2,7 @@
   "name": "wildcats-food-express",
   "private": true,
   "version": "0.0.0",
-  "proxy": "https://wildcatsexpressbackend.onrender.com",
+  "proxy": "https://wildcatsexpressbackend.onrender.com/api",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -60,7 +60,7 @@ const UserInterface = () => {
 
   useEffect(() => {
     axios
-      .get("https://wildcatsexpressbackend.onrender.com/dashboard")
+      .get("https://wildcatsexpressbackend.onrender.com/api/dashboard")
       .then((res) => {
         if (res.data.valid) {
           setMessage(res.data.message);
@@ -103,7 +103,7 @@ const UserInterface = () => {
   }, []);
 
   useEffect(() => {
-    const newSocket = io("https://wildcatsexpressbackend.onrender.com");
+    const newSocket = io("https://wildcatsexpressbackend.onrender.com/api");
     setSocket(newSocket);
 
     // Authenticate the socket connection with the user ID
@@ -222,7 +222,7 @@ const UserInterface = () => {
   //gcash number
   const fetchGcashNumber = async () => {
     try {
-      const response = await axios.get("https://wildcatsexpressbackend.onrender.com/get-gcash-number");
+      const response = await axios.get("https://wildcatsexpressbackend.onrender.com/api/get-gcash-number");
       if (response.data.gcashNumber) {
         setGcashNumber(response.data.gcashNumber);
       }
@@ -235,9 +235,9 @@ const UserInterface = () => {
   //fetch qr code image
   const fetchQRCode = async () => {
     try {
-      const response = await axios.get("https://wildcatsexpressbackend.onrender.com/get-qr-code");
+      const response = await axios.get("https://wildcatsexpressbackend.onrender.com/api/get-qr-code");
       if (response.data.qrCodeUrl) {
-        setQrCodeImage(`https://wildcatsexpressbackend.onrender.com${response.data.qrCodeUrl}`);
+        setQrCodeImage(`https://wildcatsexpressbackend.onrender.com/api${response.data.qrCodeUrl}`);
       } else {
         setQrCodeImage(null);
       }
@@ -249,11 +249,11 @@ const UserInterface = () => {
 
   const fetchMenuItems = async () => {
     try {
-      const response = await axios.get("https://wildcatsexpressbackend.onrender.com/menu");
+      const response = await axios.get("https://wildcatsexpressbackend.onrender.com/api/menu");
       const menuData = response.data.map((item) => ({
         ...item,
         image: item.image
-          ? `https://wildcatsexpressbackend.onrender.com/Images/${item.image.split("\\").pop()}`
+          ? `https://wildcatsexpressbackend.onrender.com/api/Images/${item.image.split("\\").pop()}`
           : null,
       }));
       setMenuItems(menuData);
@@ -266,7 +266,7 @@ const UserInterface = () => {
     try {
       const userId = localStorage.getItem("userID");
       const response = await axios.get(
-        `https://wildcatsexpressbackend.onrender.com/orders?userId=${userId}`
+        `https://wildcatsexpressbackend.onrender.com/api/orders?userId=${userId}`
       );
       const orders = response.data;
 
@@ -296,7 +296,7 @@ const UserInterface = () => {
   const fetchUserData = async () => {
     try {
       const userId = localStorage.getItem("userID");
-      const response = await axios.get(`https://wildcatsexpressbackend.onrender.com/user/${userId}`);
+      const response = await axios.get(`https://wildcatsexpressbackend.onrender.com/api/user/${userId}`);
       setUser({
         name: `${response.data.firstName} ${response.data.lastName}`,
         profilePicture: response.data.profilePicture,
@@ -325,7 +325,7 @@ const UserInterface = () => {
       }
       console.log(`Fetching history orders for user ID: ${userId}`);
       const response = await axios.get(
-        `https://wildcatsexpressbackend.onrender.com/history-orders?userId=${userId}`
+        `https://wildcatsexpressbackend.onrender.com/api/history-orders?userId=${userId}`
       );
       setHistoryOrders(response.data);
     } catch (error) {
@@ -430,7 +430,7 @@ const UserInterface = () => {
     console.log("Order Payload:", JSON.stringify(order, null, 2));
 
     try {
-      const response = await axios.post("https://wildcatsexpressbackend.onrender.com/orders", order);
+      const response = await axios.post("https://wildcatsexpressbackend.onrender.com/api/orders", order);
       console.log("Order placed successfully:", response.data);
       fetchOrders();
       alert("Order placed successfully! Please proceed to payment.");
@@ -463,7 +463,7 @@ const UserInterface = () => {
       }
 
       const response = await axios.put(
-        `https://wildcatsexpressbackend.onrender.com/update-profile/${userId}`,
+        `https://wildcatsexpressbackend.onrender.com/api/update-profile/${userId}`,
         formData,
         {
           headers: {
@@ -539,7 +539,7 @@ const UserInterface = () => {
     }
     try {
       const response = await axios.post(
-        "https://wildcatsexpressbackend.onrender.com/change-password",
+        "https://wildcatsexpressbackend.onrender.com/api/change-password",
         {
           userId,
           oldPassword,
@@ -826,7 +826,7 @@ const UserInterface = () => {
   const handleLogout = async () => {
     try {
       await axios.post(
-        "https://wildcatsexpressbackend.onrender.com/logout",
+        "https://wildcatsexpressbackend.onrender.com/api/logout",
         {},
         { withCredentials: true }
       );
@@ -955,7 +955,7 @@ const UserInterface = () => {
         formData.append("amountSent", formattedAmountSent);
 
         const response = await axios.put(
-          "https://wildcatsexpressbackend.onrender.com/update-order",
+          "https://wildcatsexpressbackend.onrender.com/api/update-order",
           formData,
           {
             headers: {
@@ -1315,7 +1315,7 @@ const UserInterface = () => {
               />
             ) : user.profilePicture ? (
               <img
-                src={`https://wildcatsexpressbackend.onrender.com${user.profilePicture}`}
+                src={`https://wildcatsexpressbackend.onrender.com/api${user.profilePicture}`}
                 alt="Profile"
                 className="profile-picture"
               />
@@ -1425,7 +1425,7 @@ const UserInterface = () => {
           <div className="user-info">
             {user.profilePicture ? (
               <img
-                src={`https://wildcatsexpressbackend.onrender.com${user.profilePicture}`}
+                src={`https://wildcatsexpressbackend.onrender.com/api${user.profilePicture}`}
                 alt="Profile"
                 className="user-avatar"
               />

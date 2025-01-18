@@ -33,7 +33,7 @@ const Signup = () => {
     }
 
     axios
-      .post("https://wildcatsexpressbackend.onrender.com/Register", {
+      .post("https://wildcatsexpressbackend.onrender.com/api/Register", {
         firstName,
         lastName,
         courseYear,

@@ -61,7 +61,7 @@ const MainAdminInterface = () => {
 
   useEffect(() => {
     axios
-      .get("https://wildcatsexpressbackend.onrender.com/admin")
+      .get("https://wildcatsexpressbackend.onrender.com/api/admin")
       .then((res) => {
         if (res.data.valid) {
           setMessage(res.data.message);
@@ -103,7 +103,7 @@ const MainAdminInterface = () => {
   }, []);
 
   useEffect(() => {
-    const newSocket = io("https://wildcatsexpressbackend.onrender.com");
+    const newSocket = io("https://wildcatsexpressbackend.onrender.com/api");
     setSocket(newSocket);
 
     return () => newSocket.close();
@@ -165,11 +165,11 @@ const MainAdminInterface = () => {
 
   const fetchMenuItems = async () => {
     try {
-      const response = await axios.get("https://wildcatsexpressbackend.onrender.com/menu");
+      const response = await axios.get("https://wildcatsexpressbackend.onrender.com/api/menu");
       const menuData = response.data.map((item) => ({
         ...item,
         image: item.image
-          ? `https://wildcatsexpressbackend.onrender.com/Images/${item.image.split("\\").pop()}`
+          ? `https://wildcatsexpressbackend.onrender.com/api/Images/${item.image.split("\\").pop()}`
           : null,
       }));
       setMenuItems(menuData);
@@ -182,7 +182,7 @@ const MainAdminInterface = () => {
     try {
       const userId = localStorage.getItem("userID");
       const response = await axios.get(
-        `https://wildcatsexpressbackend.onrender.com/orders?userId=${userId}`
+        `https://wildcatsexpressbackend.onrender.com/api/orders?userId=${userId}`
       );
       setOnlineOrders(response.data);
       console.log("Fetched orders:", response.data);
@@ -204,7 +204,7 @@ const MainAdminInterface = () => {
 
   const fetchClientOrders = async () => {
     try {
-      const response = await axios.get("https://wildcatsexpressbackend.onrender.com/clientorders");
+      const response = await axios.get("https://wildcatsexpressbackend.onrender.com/api/clientorders");
       console.log("Fetched client orders:", response.data);
       setCustomerOrders(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
@@ -216,13 +216,13 @@ const MainAdminInterface = () => {
   const handleStatusChangeClient = async (orderId, newStatus) => {
     try {
       if (newStatus === "Cancelled") {
-        await axios.delete(`https://wildcatsexpressbackend.onrender.com/clientorders/${orderId}`);
+        await axios.delete(`https://wildcatsexpressbackend.onrender.com/api/clientorders/${orderId}`);
         setCustomerOrders((prevOrders) =>
           prevOrders.filter((order) => order._id !== orderId)
         );
       } else {
         await axios.put(
-          `https://wildcatsexpressbackend.onrender.com/clientorders/${orderId}/status`,
+          `https://wildcatsexpressbackend.onrender.com/api/clientorders/${orderId}/status`,
           { status: newStatus }
         );
         setCustomerOrders((prevOrders) =>
@@ -281,7 +281,7 @@ const MainAdminInterface = () => {
     try {
       if (currentItem._id) {
         await axios.put(
-          `https://wildcatsexpressbackend.onrender.com/menu/${currentItem._id}`,
+          `https://wildcatsexpressbackend.onrender.com/api/menu/${currentItem._id}`,
           formData,
           {
             headers: {
@@ -290,7 +290,7 @@ const MainAdminInterface = () => {
           }
         );
       } else {
-        await axios.post("https://wildcatsexpressbackend.onrender.com/menu", formData, {
+        await axios.post("https://wildcatsexpressbackend.onrender.com/api/menu", formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -305,7 +305,7 @@ const MainAdminInterface = () => {
 
   const handleDelete = async (_id) => {
     try {
-      const response = await axios.delete(`https://wildcatsexpressbackend.onrender.com/menu/${_id}`);
+      const response = await axios.delete(`https://wildcatsexpressbackend.onrender.com/api/menu/${_id}`);
       if (response.status === 200) {
         setMenuItems(menuItems.filter((item) => item._id !== _id));
       } else {
@@ -343,7 +343,7 @@ const MainAdminInterface = () => {
       }
 
       const response = await axios.put(
-        `https://wildcatsexpressbackend.onrender.com/orders/${orderId}/status`,
+        `https://wildcatsexpressbackend.onrender.com/api/orders/${orderId}/status`,
         {
           status: newStatus,
         }
@@ -564,7 +564,7 @@ const MainAdminInterface = () => {
 
   const handleGcashNumberUpdate = async () => {
     try {
-      const response = await axios.post("https://wildcatsexpressbackend.onrender.com/update-gcash-number", { gcashNumber });
+      const response = await axios.post("https://wildcatsexpressbackend.onrender.com/api/update-gcash-number", { gcashNumber });
       if (response.data.success) {
         alert("GCash number updated successfully!");
       } else {
@@ -579,7 +579,7 @@ const MainAdminInterface = () => {
   const handleLogout = async () => {
     try {
       await axios.post(
-        "https://wildcatsexpressbackend.onrender.com/logout",
+        "https://wildcatsexpressbackend.onrender.com/api/logout",
         {},
         { withCredentials: true }
       );
@@ -598,7 +598,7 @@ const MainAdminInterface = () => {
       formData.append("qrCode", file);
       try {
         const response = await axios.post(
-          "https://wildcatsexpressbackend.onrender.com/upload-qr-code",
+          "https://wildcatsexpressbackend.onrender.com/api/upload-qr-code",
           formData,
           {
             headers: {
@@ -607,7 +607,7 @@ const MainAdminInterface = () => {
           }
         );
         if (response.data.qrCodeUrl) {
-          setQrCodeImage(`https://wildcatsexpressbackend.onrender.com${response.data.qrCodeUrl}`);
+          setQrCodeImage(`https://wildcatsexpressbackend.onrender.com/api${response.data.qrCodeUrl}`);
         }
         alert("QR code uploaded successfully!");
       } catch (error) {
@@ -618,7 +618,7 @@ const MainAdminInterface = () => {
   };
   const handleRemoveQRCode = async () => {
     try {
-      await axios.delete("https://wildcatsexpressbackend.onrender.com/remove-qr-code");
+      await axios.delete("https://wildcatsexpressbackend.onrender.com/api/remove-qr-code");
       setQrCodeImage(null);
       alert("QR code removed successfully!");
     } catch (error) {
@@ -629,9 +629,9 @@ const MainAdminInterface = () => {
 
   const fetchQRCode = async () => {
     try {
-      const response = await axios.get("https://wildcatsexpressbackend.onrender.com/get-qr-code");
+      const response = await axios.get("https://wildcatsexpressbackend.onrender.com/api/get-qr-code");
       if (response.data.qrCodeUrl) {
-        setQrCodeImage(`https://wildcatsexpressbackend.onrender.com${response.data.qrCodeUrl}`);
+        setQrCodeImage(`https://wildcatsexpressbackend.onrender.com/api${response.data.qrCodeUrl}`);
       } else {
         setQrCodeImage(null);
       }
@@ -659,7 +659,7 @@ const MainAdminInterface = () => {
         return;
       }
       const response = await axios.get(
-        `https://wildcatsexpressbackend.onrender.com/history-orders?userId=${userId}`
+        `https://wildcatsexpressbackend.onrender.com/api/history-orders?userId=${userId}`
       );
       setHistoryOrders(response.data);
     } catch (error) {
@@ -741,7 +741,7 @@ const MainAdminInterface = () => {
                       <td style={{ border: "none" }}>
                         {order.receiptPath ? (
                           <a
-                            href={`https://wildcatsexpressbackend.onrender.com${order.receiptPath}`} // Updated to use the correct port
+                            href={`https://wildcatsexpressbackend.onrender.com/api${order.receiptPath}`} // Updated to use the correct port
                             target="_blank"
                             rel="noopener noreferrer"
                           >
